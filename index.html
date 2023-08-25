@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Duplicate BibTeX Finder</title>
+</head>
+<body>
+<!-- Made by ChatGPT lol -->
+<h1>Duplicate BibTeX Finder</h1>
+
+<p>Paste your BibTeX references below:</p>
+<textarea id="bibtexInput" rows="10" cols="80"></textarea>
+<br>
+<button onclick="findDuplicates()">Find Duplicates</button>
+
+<h2>Duplicate references:</h2>
+<ul id="duplicatesList"></ul>
+
+<script>
+  function findDuplicates() {
+    const input = document.getElementById('bibtexInput').value;
+    const entries = input.split('@');
+    const titleMap = {};
+    let currentTitle = "";
+
+    entries.forEach((entry) => {
+      if (entry.startsWith("inproceedings{") || entry.startsWith("article{")) {
+        // Adjusting the regular expression to account for variations in formatting
+        const titleMatch = entry.match(/title\s*=\s*{([^{}]+)}/i);
+        if (titleMatch) {
+          currentTitle = titleMatch[1].trim().toLowerCase(); // Converting to lowercase for case-insensitive comparison
+          if (titleMap[currentTitle]) {
+            titleMap[currentTitle]++;
+          } else {
+            titleMap[currentTitle] = 1;
+          }
+        }
+      }
+    });
+
+    const duplicatesList = document.getElementById('duplicatesList');
+    duplicatesList.innerHTML = '';
+
+    for (const [title, count] of Object.entries(titleMap)) {
+      if (count > 1) {
+        const listItem = document.createElement('li');
+        listItem.textContent = title;
+        duplicatesList.appendChild(listItem);
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
