@@ -16,18 +16,16 @@
 <ul id="duplicatesList"></ul>
 
 <script>
-  function findDuplicates() {
-    const input = document.getElementById('bibtexInput').value;
+  function parseBibTeX(input) {
     const entries = input.split('@');
     const titleMap = {};
-    let currentTitle = "";
 
     entries.forEach((entry) => {
-      if (entry.startsWith("inproceedings{") || entry.startsWith("article{")) {
-        // Adjusting the regular expression to account for variations in formatting
-        const titleMatch = entry.match(/title\s*=\s*{([^{}]+)}/i);
+      // Generalise to include other types of BibTeX entries
+      if (entry.match(/^\w+\{/)) {
+        const titleMatch = entry.match(/title\s*=\s*{{1,2}([^{}]+)}}{0,2}/i);
         if (titleMatch) {
-          currentTitle = titleMatch[1].trim().toLowerCase(); // Converting to lowercase for case-insensitive comparison
+          const currentTitle = titleMatch[1].trim().toLowerCase(); // Converting to lowercase for case-insensitive comparison
           if (titleMap[currentTitle]) {
             titleMap[currentTitle]++;
           } else {
@@ -37,7 +35,14 @@
       }
     });
 
+    return titleMap;
+  }
+
+  function findDuplicates() {
+    const input = document.getElementById('bibtexInput').value;
+    const titleMap = parseBibTeX(input);
     const duplicatesList = document.getElementById('duplicatesList');
+
     duplicatesList.innerHTML = '';
 
     for (const [title, count] of Object.entries(titleMap)) {
